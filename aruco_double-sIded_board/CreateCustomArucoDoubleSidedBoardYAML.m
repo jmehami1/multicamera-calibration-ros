@@ -79,13 +79,14 @@ end
 %plot aruco board to compare with actual
 PlotArucoBoard(markerIDs, markerCorners);
 
-disp("Saving double sided board YAML file")
+saveYamlFile = fullfile("..", "calibration_files", 'aruco-board-markers.yaml');
+fprintf("Saving double sided board YAML file tp %s\n", saveYamlFile);
 
 %save YAML file with IDs and consective marker corners
 paramStruct.objPoints = round(markerCorners, 5);
 paramStruct.ids = markerIDs;
 paramStruct.dictionary = '4x4';
-yaml.WriteYaml('aruco-board-markers.yaml', paramStruct);
+yaml.WriteYaml(saveYamlFile, paramStruct);
 
 
 %% Helper functions

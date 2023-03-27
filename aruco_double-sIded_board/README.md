@@ -46,7 +46,7 @@ A [PDF](./aruco_double_sided_board.pdf) of the original double-sided board is in
 
 ## Board Marker YAML File
 
-The MATLAB script  [CreateCustomArucoDoubleSidedBoardYAML.m](CreateCustomArucoDoubleSidedBoardYAML.m) creates a YAML file called [aruco-board-markers.yaml](aruco-board-markers.yaml)  that stores the required details of the double-sided board to perform calibration. If you open the YAML file you will find the following parameters:
+The MATLAB script  [CreateCustomArucoDoubleSidedBoardYAML.m](CreateCustomArucoDoubleSidedBoardYAML.m) creates a YAML file called `aruco-board-markers.yaml`  which is saved in the folder **calibration_files**. It stores the required details of the double-sided board to perform calibration. If you open the YAML file you will find the following parameters:
 
 | Parameter  | Description                                                  |
 | ---------- | ------------------------------------------------------------ |
