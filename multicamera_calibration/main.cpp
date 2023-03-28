@@ -7,14 +7,17 @@
 #include <thread>
 
 #include "ros_camera.h"
+#include <chrono>
+
+
 
 namespace fs = std::filesystem;
-
+using namespace std::chrono_literals;
 
 // Function to write vector to csv file 
 void writeVectorToCSV(std::string cameraInfoFile, std::vector<BoardCameraExtrinsic> &vec, std::vector<std::string> topicNames) 
 { 
-   std::cout << "writing csv ..." <<  std::endl;
+   std::cout << "\nWriting to csv ... " << std::flush;
     std::ofstream outfile; 
     outfile.open(cameraInfoFile); 
 
@@ -58,6 +61,39 @@ void writeVectorToCSV(std::string cameraInfoFile, std::vector<BoardCameraExtrins
     outfile.close(); 
 }
 
+//thread process function to automatically shutdown node is image topics are no longer active
+void checkTimeoutCameraTopicsProcess(std::vector<std::shared_ptr<RosCamera>> cameras, const int timeOut, const int numTopics) {
+
+  int numTopicsTimedOut = 0;
+
+  while (ros::ok){
+
+      auto curTime = std::chrono::high_resolution_clock::now();
+
+      for (auto c : cameras){
+        auto lastMsgTime = c->getLasMsgTime();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(curTime - lastMsgTime);
+
+        if (duration.count() > timeOut)
+            numTopicsTimedOut++;
+      }
+      
+      ROS_INFO_STREAM("Number of active topic streams: " << numTopics - numTopicsTimedOut << " out of " << numTopics);
+        
+      if (numTopicsTimedOut >= numTopics){
+        std::cout << "\nShutting down\n" << std::endl;
+        ros::shutdown();
+        break;
+      }else
+        numTopicsTimedOut = 0;
+    
+    std::this_thread::sleep_for(2000ms);
+  }
+
+  ros::shutdown();
+
+}
+
 
 
 int main(int argc, char **argv)
@@ -99,10 +135,17 @@ int main(int argc, char **argv)
     cameras.push_back(std::shared_ptr<RosCamera>(new RosCamera(nh, cameraTopicNames.at(i), i, aruco_board, intrinsic_vectors.at(i))));
   }
 
+  int timeOut = 10;
+
+  std::cout << "\nNode will timeout and quit after " << timeOut << " seconds of inactivity from topics!\n" << std::endl; 
+  std::thread timeOutT(checkTimeoutCameraTopicsProcess, cameras, timeOut, cameraTopicNames.size()); 
+
   //use all available processors to handle image callbacks
   ros::AsyncSpinner spinner(processor_count-1);
   spinner.start();
   ros::waitForShutdown();
+
+  timeOutT.join();
 
   //collect all successfully estimated board poses from each camera
   std::vector<BoardCameraExtrinsic> allData;
@@ -120,7 +163,7 @@ int main(int argc, char **argv)
   fs::path cameraPosesCSV = calibrationFiles / "camera_board_poses_timestamped.csv";
   writeVectorToCSV(cameraPosesCSV.string(), allData, cameraTopicNames);
 
-  std::cout << "Shutting down!!!"  << std::endl;
+  std::cout << "Done!!!"  << std::endl;
 
   return 0;
 }

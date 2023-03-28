@@ -7,6 +7,8 @@ nh_(nh), topicName_(topicName), cameraIndex_(cameraIndex), board_(board), intrin
   	parameters_ = cv::aruco::DetectorParameters::create();
 	arucoBoard_ = cv::aruco::Board::create(board.objPoints, board.dictionary, board.ids);
 
+	lastMsgTime_ = std::chrono::high_resolution_clock::now();
+	firstMsgReceivedFlag_ = false;
 	// subscribe to image topic
 	imageSub_ = it_.subscribe(topicName_, 1000, &RosCamera::cameraImageCallback, this);
 
@@ -16,6 +18,8 @@ nh_(nh), topicName_(topicName), cameraIndex_(cameraIndex), board_(board), intrin
 
 void RosCamera::cameraImageCallback(const sensor_msgs::ImageConstPtr &msg)
 {
+	firstMsgReceivedFlag_ = true;
+	lastMsgTime_ = std::chrono::high_resolution_clock::now();
 	// Convert sensor_msgs/Image to cv::Mat
 	cv::Mat inputImage = cv_bridge::toCvShare(msg, "bgr8")->image; 
 
@@ -33,6 +37,18 @@ void RosCamera::cameraImageCallback(const sensor_msgs::ImageConstPtr &msg)
 	}
 
 }
+
+std::chrono::time_point<std::chrono::high_resolution_clock> RosCamera::getLasMsgTime()
+{
+	return lastMsgTime_;
+}
+
+bool RosCamera::getFirstMsgFlag()
+{
+	return firstMsgReceivedFlag_;
+}
+
+
 
 
 bool RosCamera::arucoBoardExtrinsic(cv::Mat &image, cv::Vec4d &quaternion, cv::Vec3d &tvec)

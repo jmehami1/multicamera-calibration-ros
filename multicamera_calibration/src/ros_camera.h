@@ -32,6 +32,8 @@ class RosCamera{
 	public:
 		RosCamera(ros::NodeHandle nh, std::string topicName, unsigned int cameraIndex, BoardConfiguration board, cv::Mat intrinsic);
 		std::vector<BoardCameraExtrinsic> getCopyBoardExtrinsicData();
+		std::chrono::time_point<std::chrono::high_resolution_clock> getLasMsgTime();
+		bool getFirstMsgFlag();
 	private:
 		std::string topicName_;
 		BoardConfiguration board_;
@@ -51,6 +53,8 @@ class RosCamera{
 		void cameraImageCallback(const sensor_msgs::ImageConstPtr &msg);
 		cv::Mat rvectvecToTransformationMatrix(cv::Vec3d &rvec, cv::Vec3d &tvec);
 		cv::Vec4d rvecToQuaternion(cv::Vec3d rvec);
+		std::chrono::time_point<std::chrono::high_resolution_clock> lastMsgTime_;
+		bool firstMsgReceivedFlag_;
 
 };
 
