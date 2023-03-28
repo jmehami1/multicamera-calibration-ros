@@ -1,13 +1,10 @@
-// #include "ros/ros.h"
-// #include "camera_wrapper.h"
-// #include "camera.h"
-// #include "calibration.h"
-// #include "wrapper.h"
+#include "ros/ros.h"
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include "yaml_reader.h"
 #include <filesystem>
+#include <thread>
 
 #include "ros_camera.h"
 
@@ -65,10 +62,11 @@ void writeVectorToCSV(std::string cameraInfoFile, std::vector<BoardCameraExtrins
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "camera_calibration");
-
-  // ros process input argument
+  ros::init(argc, argv, "multi_camera_calibration");
   ros::NodeHandle nh;
+
+  const auto processor_count = std::thread::hardware_concurrency();
+  std::cout << "Number of processors available: " << processor_count << std::endl;
 
   //calibration files
   fs::path calibrationFiles(__FILE__);
@@ -95,29 +93,18 @@ int main(int argc, char **argv)
   BoardConfiguration aruco_board;
   yaml::Read_ArUco(aruco_board_markers.string(), aruco_board.dictionary, aruco_board.ids, aruco_board.objPoints);
 
+  //create ros camera objected using each image topic
   std::vector<std::shared_ptr<RosCamera>> cameras;
-
   for (int i = 0; i < cameraTopicNames.size(); i++){
-
-    // cameras->push_back(new RosCamera(nh, cameraTopicNames.at(i), i, aruco_board, intrinsic_vectors.at(i)));
-
     cameras.push_back(std::shared_ptr<RosCamera>(new RosCamera(nh, cameraTopicNames.at(i), i, aruco_board, intrinsic_vectors.at(i))));
-    // std::shared_ptr<CameraInterface> cam(new Camera(i));
-    // cams.push_back(cam);
-
-    // std::shared_ptr<CameraWrapper> cam_wrp(new CameraWrapper(nh, cameraTopicNames.at(i), i));
-    // cam_wrp->setCamera(cam);
-    // camWrappers.push_back(cam_wrp);
   }
 
-//   // std::shared_ptr<CameraInterface> cam(new Camera(index));
-//   // std::shared_ptr<CameraWrapper> cam_wrp(new CameraWrapper(nh, index));
-//   // cam_wrp->setCamera(cam);
+  //use all available processors to handle image callbacks
+  ros::AsyncSpinner spinner(processor_count-1);
+  spinner.start();
+  ros::waitForShutdown();
 
-  ros::spin();
-
-  std::cout << "Collecting all poses and saving to CSV file" << std::endl;
-
+  //collect all successfully estimated board poses from each camera
   std::vector<BoardCameraExtrinsic> allData;
 
   int i = 0;
@@ -128,24 +115,12 @@ int main(int argc, char **argv)
     allData.insert(std::end(allData), std::begin(curData), std::end(curData));
   }
 
+  //save all poses to CSV file
   std::cout << "Number of estimated poses across all cameras: " << allData.size() << std::endl;
-
   fs::path cameraPosesCSV = calibrationFiles / "camera_board_poses_timestamped.csv";
-
   writeVectorToCSV(cameraPosesCSV.string(), allData, cameraTopicNames);
-//     // allData.push_back();
-//     // a.insert(std::end(a), std::begin(b), std::end(b));
 
-// // function to write vector to csv file
-
-  std::cout << "Shutting down!!!" << allData.size() << std::endl;
-
-
-  ros::shutdown();
+  std::cout << "Shutting down!!!"  << std::endl;
 
   return 0;
 }
-
-// function that loads a rosbag
-
-// function that determines the closest ros message using time between two ros topics
