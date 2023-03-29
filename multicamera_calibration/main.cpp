@@ -5,7 +5,7 @@
 #include "yaml_reader.h"
 #include <filesystem>
 #include <thread>
-
+#include <ros/master.h>
 #include "ros_camera.h"
 #include <chrono>
 
@@ -98,13 +98,15 @@ void checkTimeoutCameraTopicsProcess(std::vector<std::shared_ptr<RosCamera>> cam
 
 int main(int argc, char **argv)
 {
+  
   ros::init(argc, argv, "multi_camera_calibration");
-  ros::NodeHandle nh;
 
-  const auto processor_count = std::thread::hardware_concurrency();
-  std::cout << "Number of processors available: " << processor_count << std::endl;
+  if (!ros::master::check()){
+    std::cerr << "roscore is not running" << std::endl;
+    exit(1);
+  }
 
-  //calibration files
+  //calibration file directory
   fs::path calibrationFiles(__FILE__);
   calibrationFiles = calibrationFiles.parent_path();
   calibrationFiles = calibrationFiles.parent_path();
@@ -112,13 +114,22 @@ int main(int argc, char **argv)
 
   //check for aruco board marker YAML file 
   fs::path aruco_board_markers = calibrationFiles / "aruco-board-markers.yaml";
-  if (!fs::exists(aruco_board_markers))
+  if (!fs::exists(aruco_board_markers)){
     std::cerr << "ERROR Does not exist: " << aruco_board_markers.string() << std::endl;
+    exit(1);
+  }
 
   //check for camera info YAML file 
   fs::path cameraInfoFile = calibrationFiles / "camera_info.yaml";
-  if (!fs::exists(cameraInfoFile))
+  if (!fs::exists(cameraInfoFile)){
     std::cerr << "ERROR Does not exist: " << cameraInfoFile.string() << std::endl;
+    exit(1);
+  }
+
+  ros::NodeHandle nh;
+
+  const auto processor_count = std::thread::hardware_concurrency();
+  std::cout << "Number of processors available: " << processor_count << std::endl;
 
   //Read camera intrincs and topic names from camera info YAML
   std::cout << "Reading camera info file..." << std::endl;
@@ -128,6 +139,8 @@ int main(int argc, char **argv)
   std::cout << "Reading ArUco board file..." << std::endl;
   BoardConfiguration aruco_board;
   yaml::Read_ArUco(aruco_board_markers.string(), aruco_board.dictionary, aruco_board.ids, aruco_board.objPoints);
+
+  std::cout << "\n" << std::endl;
 
   //create ros camera objected using each image topic
   std::vector<std::shared_ptr<RosCamera>> cameras;
