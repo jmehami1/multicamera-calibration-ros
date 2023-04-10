@@ -174,9 +174,11 @@ int main(int argc, char **argv)
   //save all poses to CSV file
   std::cout << "Number of estimated poses across all cameras: " << allData.size() << std::endl;
   fs::path cameraPosesCSV = calibrationFiles / "camera_board_poses_timestamped.csv";
-  writeVectorToCSV(cameraPosesCSV.string(), allData, cameraTopicNames);
 
-  std::cout << "Done!!!"  << std::endl;
+  if (allData.size() > 0){
+    writeVectorToCSV(cameraPosesCSV.string(), allData, cameraTopicNames);
+    std::cout << "Done!!!"  << std::endl;
+  }
 
   return 0;
 }
