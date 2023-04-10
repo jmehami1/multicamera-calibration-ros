@@ -13,7 +13,7 @@ std::vector<cv::Mat> yaml::Read_Intrinsic(const std::string filename){
             intrinsic.push_back(camera_matrix);
         }
     }
-    // std::cout << intrinsic.size() << std::endl;
+    
     return intrinsic;
 }
 
@@ -24,7 +24,7 @@ std::vector<std::string> yaml::Read_Topic_Names(const std::string filename){
     if (config["topics"]){
         topicNames = config["topics"].as<std::vector<std::string>>();
     }
-    // std::cout << intrinsic.size() << std::endl;
+    
     return topicNames;
 }
 

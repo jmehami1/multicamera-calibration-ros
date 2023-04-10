@@ -38,7 +38,7 @@ void RosCamera::cameraImageCallback(const sensor_msgs::ImageConstPtr &msg)
 
 }
 
-std::chrono::time_point<std::chrono::high_resolution_clock> RosCamera::getLasMsgTime()
+std::chrono::time_point<std::chrono::high_resolution_clock> RosCamera::getLastMsgTime()
 {
 	return lastMsgTime_;
 }
@@ -86,19 +86,6 @@ std::vector<BoardCameraExtrinsic> RosCamera::getCopyBoardExtrinsicData()
 {
 	return boardExtrinsics;
 } 
-
-cv::Mat RosCamera::rvectvecToTransformationMatrix(cv::Vec3d &rvec, cv::Vec3d &tvec)
-{
-	cv::Mat R;              // Rotation matrix
-	cv::Rodrigues(rvec, R); // Convert rvec (1x3) to rotation matrix (3x3)
-
-	cv::Mat tf = (cv::Mat_<double>(4, 4) << R.at<double>(0, 0), R.at<double>(0, 1), R.at<double>(0, 2), tvec[0],
-					R.at<double>(1, 0), R.at<double>(1, 1), R.at<double>(1, 2), tvec[1],
-					R.at<double>(2, 0), R.at<double>(2, 1), R.at<double>(2, 2), tvec[2],
-					0, 0, 0, 1);
-
-	return tf;
-}
 
 cv::Vec4d RosCamera::rvecToQuaternion(cv::Vec3d rvec)
 {

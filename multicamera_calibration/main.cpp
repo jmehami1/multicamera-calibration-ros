@@ -14,7 +14,14 @@
 namespace fs = std::filesystem;
 using namespace std::chrono_literals;
 
-// Function to write vector to csv file 
+// Function to write vector to csv file
+/**
+ * @brief Writes a vector of poses, stored as @sa BoardCameraExtrinsic, to a CSV file
+ * 
+ * @param cameraInfoFile 
+ * @param vec 
+ * @param topicNames 
+ */
 void writeVectorToCSV(std::string cameraInfoFile, std::vector<BoardCameraExtrinsic> &vec, std::vector<std::string> topicNames) 
 { 
    std::cout << "\nWriting to csv ... " << std::flush;
@@ -54,14 +61,19 @@ void writeVectorToCSV(std::string cameraInfoFile, std::vector<BoardCameraExtrins
             outfile << "," << topicNames.at(vec.at(i).camIndex);
 
             outfile << "," << "\n";  
-        }  
-
+        }
     }  
 
     outfile.close(); 
 }
 
-//thread process function to automatically shutdown node is image topics are no longer active
+/**
+ * @brief Timeout function to automatically shutdown node once all topics are no longer publishing image messages
+ * 
+ * @param cameras 
+ * @param timeOut 
+ * @param numTopics 
+ */
 void checkTimeoutCameraTopicsProcess(std::vector<std::shared_ptr<RosCamera>> cameras, const int timeOut, const int numTopics) {
 
   int numTopicsTimedOut = 0;
@@ -71,7 +83,7 @@ void checkTimeoutCameraTopicsProcess(std::vector<std::shared_ptr<RosCamera>> cam
       auto curTime = std::chrono::high_resolution_clock::now();
 
       for (auto c : cameras){
-        auto lastMsgTime = c->getLasMsgTime();
+        auto lastMsgTime = c->getLastMsgTime();
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(curTime - lastMsgTime);
 
         if (duration.count() > timeOut)
