@@ -1,0 +1,8 @@
+# Double sided board dimension parameters
+# All lengths are in metres
+
+markerSideLength: 0.04
+separationLength: 0.02
+boardThickness: 0.0066
+numRows: 4
+numCols: 7

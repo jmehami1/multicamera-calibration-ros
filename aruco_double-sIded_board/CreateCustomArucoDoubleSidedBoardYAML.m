@@ -24,12 +24,15 @@ addpath(genpath(fullfile('..','ext_lib','yamlmatlab-master')));
 
 %% Board dimension parameters
 
+boardDimensionYaml = fullfile('board_dimensions.yaml');
+boardParameters = yaml.ReadYaml(boardDimensionYaml);
+
 %Dimensions in metres
-markerSideLen = 0.04;
-sepLen = 0.02;
-boardThickness = 0.0066;
-numRows = 4;
-numCols = 7;
+markerSideLen = boardParameters.markerSideLength;
+sepLen = boardParameters.separationLength;
+boardThickness = boardParameters.boardThickness;
+numRows = boardParameters.numRows;
+numCols = boardParameters.numCols;
 
 %% Creating board parameters
 

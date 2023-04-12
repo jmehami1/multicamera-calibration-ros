@@ -3,21 +3,27 @@
 To carry out the extrinsic calibration of all cameras, a custom double-sided ArUco board is required. This board is comprised of ArUco tags from the DICT_4X4 dictionary and the thickness of the board is not ignored.
 
 <p float="left">
-	<img align="center" src="aruco_double_sided_board_front.jpg" alt="Light simulator in MATLAB" width="49%" />
-	<img align="center" src="aruco_double_sided_board_back.jpg" alt="Light simulator in MATLAB" width="49%" />
+	<img align="left" src="aruco_double_sided_board_front.jpg" alt="Light simulator in MATLAB" width="45%" />
+	<img align="right" src="aruco_double_sided_board_back.jpg" alt="Light simulator in MATLAB" width="45%" />
 </p><br clear="left">
 
 *Note the location of the origin and its coordinate system*
 
+
+
 ## Default Board Parameters
 
-| Parameter      | Description                                                  | Default Value |
-| -------------- | ------------------------------------------------------------ | ------------- |
-| markerSideLen  | Side length of each ArUco tag marker                         | 0.04 m        |
-| sepLen         | Separation distance between markers                          | 0.02 m        |
-| numRows        | Number of rows of markers                                    | 4             |
-| numCols        | Number of columns of markers                                 | 7             |
-| boardThickness | Thickness of board material (assumed to be constant over entire board) | 0.0066 m      |
+| Parameter        | Description                                                  | Default Value |
+| ---------------- | ------------------------------------------------------------ | ------------- |
+| markerSideLength | Side length of each ArUco tag marker                         | 0.04 m        |
+| separationLength | Separation distance between markers                          | 0.02 m        |
+| numRows          | Number of rows of markers                                    | 4             |
+| numCols          | Number of columns of markers                                 | 7             |
+| boardThickness   | Thickness of board material (assumed to be constant over entire board) | 0.0066 m      |
+
+If you are using the provided A3 board, you will most likely need to change the board thickness to match the thickness of the material you are using. The board thickness here was measured using vernier calipers.
+
+These parameters can be found in the [board_dimensions.yaml](./[board_dimensions.yaml) file and can be edited as required.
 
 
 
@@ -26,11 +32,14 @@ To carry out the extrinsic calibration of all cameras, a custom double-sided ArU
 The physical board will be made by printing both sides on plain paper, and sticking them onto a rigid flat surface made from a material which you can drill into such as:
 
 - cardboard
+
 - plywood
+
 - corrugated plastic
+
 - Plexiglass/acrylic sheets
 
-
+  
 
 A [PDF](./aruco_double_sided_board.pdf) of the original double-sided board is included which you can print.
 
