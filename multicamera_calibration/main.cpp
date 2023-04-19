@@ -163,14 +163,14 @@ int main(int argc, char **argv)
   int timeOut = 10;
 
   std::cout << "\nNode will timeout and quit after " << timeOut << " seconds of inactivity from topics!\n" << std::endl; 
-  std::thread timeOutT(checkTimeoutCameraTopicsProcess, cameras, timeOut, cameraTopicNames.size()); 
+  std::thread timeOutThr(checkTimeoutCameraTopicsProcess, cameras, timeOut, cameraTopicNames.size()); 
 
   //use all available processors to handle image callbacks
   ros::AsyncSpinner spinner(processor_count-1);
   spinner.start();
   ros::waitForShutdown();
 
-  timeOutT.join();
+  timeOutThr.join();
 
   //collect all successfully estimated board poses from each camera
   std::vector<BoardCameraExtrinsic> allData;
