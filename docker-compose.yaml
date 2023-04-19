@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  # ROS core 
+  roscore:
+    image: ros:noetic-ros-core
+    command: roscore
+    network_mode: host
+    restart: always
+    healthcheck:
+      test: . /opt/ros/noetic/setup.sh; rostopic list
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # Runs the aruco pose estimation from image topics
+  calibration:
+    depends_on:
+      roscore:
+        condition: service_healthy
+    build:
+      context: .
+      dockerfile: multicamera-calibration-ros.Dockerfile
+    network_mode: host
+    volumes:
+        - ./calibration_files:/catkin_ws/src/calibration_files
+    command: >
+      ./catkin_ws/devel/lib/multi_camera_calibration/multi_camera_calibration
+
+  # ros play-back
+  rosbag-player:
+    image: ros:noetic-ros-core
+    network_mode: host
+    depends_on:
+      roscore:
+        condition: service_healthy
+      calibration:
+        condition: service_started
+    volumes:
+        - ./ros_bags:/ros_bags
+    command: sh -c "rosbag play -r 0.7 -d 5 -q /ros_bags/*.bag"
+
+
