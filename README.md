@@ -30,7 +30,7 @@ This project extrinsically calibrates a multi-camera system operating in ROS by 
 
 5. All estimated poses per camera will be displayed at the end. Once you see the following message press ctrl-c to kill containers
 
-![](/home/jmeh/Git/multicamera-calibration-ros/images/docker_containers_finished.png)
+![](./images/docker_containers_finished.png)
 
 *NOTE: Check that all cameras have relatively similar scale of estimated poses. If not, you will need to recollect the data.
 
