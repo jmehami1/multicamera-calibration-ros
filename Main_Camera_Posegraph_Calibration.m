@@ -68,6 +68,29 @@ end
 
 topicNamesUnique = string(cameraInfoStruct.topics)';
 
+% first camera should be d_1
+updatedOriginTopic = "/cam_d_1/infra1/image_rect_raw";
+if ~strcmp(topicNamesUnique(1), updatedOriginTopic)
+    for i = 1:length(topicNamesUnique)
+        if strcmp(topicNamesUnique(i), updatedOriginTopic)
+            actualOriginCamInd = i;
+            break;
+        end
+    end
+
+    actualOriginCamID = cameraIDsUnique(actualOriginCamInd);
+    falseOriginCamID = cameraIDsUnique(1);
+
+     actualOriginMask = cameraIDs==actualOriginCamID;
+    faslseOriginMask = cameraIDs==falseOriginCamID;
+
+    cameraIDs(actualOriginMask) = falseOriginCamID;
+    cameraIDs(faslseOriginMask) = actualOriginCamID;
+
+    topicNamesUnique(actualOriginCamInd) = topicNamesUnique(1);
+    topicNamesUnique(1) = updatedOriginTopic;
+end
+
 % get short names from topics E.g. "/camera7/colour/image" becomes "camera7"
 shortCamNameIndices = strfind(topicNamesUnique,"/");
 shortCamName = topicNamesUnique;
@@ -81,6 +104,8 @@ for i=1:length(topicNamesUnique)
     curNameChar = strrep(curNameChar, '_', ' ');
     shortCamNameDisplay(i) = curNameChar;
 end
+
+
 
 camStart = min(cameraIDs);
 % first camera ID should be 1
@@ -113,7 +138,7 @@ end
 
 %% Get initial extrinsic guesses from YAML
 
-%extract translation [x,y,z] (in metres) and rotation [roll pitch yaw] (in degrees)
+% extract translation [x,y,z] (in metres) and rotation [roll pitch yaw] (in degrees)
 extrinsicGuessTrans = cell2mat(cameraInfoStruct.initial_extrinsic(:,1:3));
 extrinsicGuessRot = deg2rad(cell2mat(cameraInfoStruct.initial_extrinsic(:,4:end)));
 extrinsicGuessRot = eul2quat(extrinsicGuessRot, "ZYX");
